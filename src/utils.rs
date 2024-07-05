@@ -59,7 +59,7 @@ pub async fn get_all_students(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> 
         let last_name: &str = row.get("last_name");
         let student_age: i32 = row.get("student_age");
 
-        println!("id: {}, First Name: {}, Last Name: {}, Student Age: {}, \n", id, first_name, last_name, student_age)
+        println!("\n Student ID: {}, First Name: {}, Last Name: {}, Student Age: {}", id, first_name, last_name, student_age)
     }
 
     Ok(())
@@ -67,15 +67,24 @@ pub async fn get_all_students(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> 
 }
 
 pub async fn remove_student_by_id(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
-    let student_id_input = get_input("Enter student id you want to remove: ");
     
-    let student_id: i32 = student_id_input
-        .trim()
-        .parse::<i32>()
-        .map_err(|e| {
-            eprintln!("Error parsing id: {}", e);
-            sqlx::Error::Decode("Invalid input for student id".into())
-        })?;
+    let student_id: i32;
+
+    loop {
+        let id_input = get_input("Enter student ID you want to remove:");
+        match id_input.trim().parse::<i32>() {
+            Ok(id) if id >= 0 => {
+                student_id = id;
+                break;
+            },
+            Ok(_) => {
+                println!("Invalid age. Please enter a valid non-negative number.");
+            },
+            Err(_) => {
+                println!("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
 
     let delete_query = "DELETE FROM students WHERE id = $1";
 
@@ -84,10 +93,29 @@ pub async fn remove_student_by_id(pool: &Pool<Postgres>) -> Result<(), sqlx::Err
         .execute(pool)
         .await?;
 
-    println!("Successfully removed Student!");
+    Ok(())
+
+}
+
+pub async fn see_all_teachers(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+
+    let rows = sqlx::query("SELECT * FROM teachers")
+        .fetch_all(pool)
+        .await?;
+
+    for row in rows {
+
+        let id: i32 = row.get("id");
+        let first_name: &str = row.get("first_name");
+        let last_name: &str = row.get("last_name");
+        let student_age: i32 = row.get("teacher_age");
+
+        println!("\n Teacher ID: {}, First Name: {}, Last Name: {}, Student Age: {}", id, first_name, last_name, student_age)
+    }
 
     Ok(())
 }
+
 
 pub async fn register_teacher(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
 
@@ -122,6 +150,38 @@ pub async fn register_teacher(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> 
         .await?;
 
     println!("Succesfully added new teacher");
+
+    Ok(())
+
+}
+
+pub async fn remove_teacher_by_id(pool: &Pool<Postgres>) -> Result<(), sqlx::Error>{
+
+    let teacher_id: i32;
+
+    loop {
+        let id_input = get_input("Enter teacher ID you want to remove:");
+        match id_input.trim().parse::<i32>() {
+            Ok(id) if id >= 0 => {
+                teacher_id = id;
+                break;
+            },
+            Ok(_) => {
+                println!("Invalid age. Please enter a valid non-negative number.");
+            },
+            Err(_) => {
+                println!("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+
+
+    let delete_query = "DELETE FROM teachers WHERE id = $1";
+
+    sqlx::query(delete_query)
+        .bind(teacher_id)
+        .execute(pool)
+        .await?;
 
     Ok(())
 
