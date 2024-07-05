@@ -29,15 +29,16 @@ async fn main() -> Result<(), sqlx::Error> {
         println!("Choose an Operation:");
         println!("1. Add new student");
         println!("2. Remove student");
-        println!("3. See all students");
+        println!("3. See All Students");
         println!("4. Add Teacher");
         println!("5. Remove Teacher");
-        println!("6. Add Teacher Absence");
-        println!("7. Exit");
+        println!("6. See All Teachers");
+        println!("7. Add Teacher Absence");
+        println!("8. Exit");
 
         let option = utils::get_input("Enter a Choice: ");
 
-        if option.trim() == "7"  {
+        if option.trim() == "8"  {
             println!("Exiting...");
             break;
         }
@@ -47,6 +48,8 @@ async fn main() -> Result<(), sqlx::Error> {
             "2" => utils::remove_student_by_id(&pool).await?,
             "3" => utils::get_all_students(&pool).await?,
             "4" => utils::register_teacher(&pool).await?,
+            "5" => utils::remove_teacher_by_id(&pool).await?,
+            "6" => utils::see_all_teachers(&pool).await?,
             _ => println!("Invalid option. Please choose a valid operation."),
         }
     }
