@@ -167,7 +167,7 @@ pub async fn remove_teacher_by_id(pool: &Pool<Postgres>) -> Result<(), sqlx::Err
                 break;
             },
             Ok(_) => {
-                println!("Invalid age. Please enter a valid non-negative number.");
+                println!("Invalid ID. Please enter a valid non-negative number.");
             },
             Err(_) => {
                 println!("Invalid input. Please enter a valid number.");
@@ -210,4 +210,64 @@ pub async fn add_teacher_absence(pool: &Pool<Postgres>) -> Result<(), sqlx::Erro
     println!("Succesfully Created new teachers Absence in days {} - {}", begin_clone, end_clone);
 
     Ok(())
+}
+
+
+pub async fn remove_teacher_absence(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+
+    let teacher_absence_id: i32;
+    let teacher_absence_id_copy: i32;
+
+    loop {
+        let id_input = get_input("Enter Teacher Absence ID you want to remove: ");
+        match id_input.trim().parse::<i32>() {
+            Ok(id) if id >= 0 => {
+                teacher_absence_id = id;
+                teacher_absence_id_copy = id;
+                break;
+            },
+            Ok(_) => {
+                println!("Invalid ID. Please enter a valid non-negative number.");
+            },
+            Err(_) => {
+                println!("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+
+
+    let delete_query = "DELETE FROM teachers_absence WHERE id = $1";
+
+    sqlx::query(delete_query)
+        .bind(teacher_absence_id)
+        .execute(pool)
+        .await?;
+
+    println!("Succesfully Removed Teacher Absence with ID: {}", teacher_absence_id_copy);
+
+    Ok(())
+
+
+}
+
+pub async fn get_all_teacher_absences(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+
+    let rows = sqlx::query("SELECT * FROM teachers_absence")
+        .fetch_all(pool)
+        .await?;
+
+    for row in rows {
+
+        let id: i32 = row.get("id");
+        let first_name: &str = row.get("first_name");
+        let last_name: &str = row.get("last_name");
+        let begin_date: &str = row.get("begin_date");
+        let end_date: &str = row.get("end_date");
+
+        println!("{}. Teacher: {} {}, is Absent between : {} - {}", id, first_name, last_name, begin_date, end_date)
+
+    }
+
+    Ok(())
+
 }

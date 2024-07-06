@@ -58,6 +58,8 @@ async fn main() -> Result<(), sqlx::Error> {
             "5" => utils::remove_teacher_by_id(&pool).await?,
             "6" => utils::see_all_teachers(&pool).await?,
             "7" => utils::add_teacher_absence(&pool).await?,
+            "8" => utils::remove_teacher_absence(&pool).await?,
+            "9" => utils::get_all_teacher_absences(&pool).await?,
             _ => println!("Invalid option. Please choose a valid operation."),
         }
     }
