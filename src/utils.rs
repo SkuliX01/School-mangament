@@ -186,3 +186,28 @@ pub async fn remove_teacher_by_id(pool: &Pool<Postgres>) -> Result<(), sqlx::Err
     Ok(())
 
 }
+
+pub async fn add_teacher_absence(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+
+    let teacher_first_name = get_input("Enter Teacher First Name: ").trim().to_string();
+    let teacher_last_name = get_input("Enter Teacher Last Name: ").trim().to_string();
+    let absence_begin_date = get_input("Enter Teacher Absence Begin Date (day/month/year) format: ").trim().to_string();
+    let absence_end_date = get_input("Enter Teacher Absence End Date (day/month/year) format: ").trim().to_string();
+
+    let begin_clone = absence_begin_date.clone();
+    let end_clone = absence_end_date.clone();
+
+    let insert_query = "INSERT INTO teachers_absence (first_name, last_name, begin_date, end_date) VALUES ($1, $2, $3, $4)";
+
+    sqlx::query(insert_query)
+        .bind(teacher_first_name)
+        .bind(teacher_last_name)
+        .bind(absence_begin_date)
+        .bind(absence_end_date)
+        .execute(pool)
+        .await?;
+
+    println!("Succesfully Created new teachers Absence in days {} - {}", begin_clone, end_clone);
+
+    Ok(())
+}
